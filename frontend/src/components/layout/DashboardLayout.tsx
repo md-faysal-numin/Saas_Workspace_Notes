@@ -5,6 +5,7 @@ import Navbar from "./Navbar";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function DashboardLayout() {
+  // console.log("dashboard rendering");
   const { data: user, isLoading, error } = useAuth();
 
   // Show loading while checking cookie

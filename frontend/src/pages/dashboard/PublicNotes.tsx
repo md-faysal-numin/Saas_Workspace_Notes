@@ -6,7 +6,7 @@ import { noteService } from "../../services/noteService";
 import SearchBar from "../../components/common/SearchBar";
 import NoteFilters from "../../components/notes/NoteFilters";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function PublicNotes() {
   const { workspaceId } = useParams();
@@ -49,7 +49,7 @@ export default function PublicNotes() {
     }
   };
 
-  const user = authService.getUser();
+  const { data: user } = useAuth();
 
   return (
     <div className="p-6 max-w-7xl mx-auto">

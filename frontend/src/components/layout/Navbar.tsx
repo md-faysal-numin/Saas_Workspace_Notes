@@ -9,25 +9,8 @@ export default function Navbar() {
   const { workspaceId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  // const user = authService.getUser();
-  // // console.log("hi", user);
-  // const { data: user } = useAuth();
 
-  // console.log(user);
-
-  const { data: user, isLoading } = useAuth();
-
-  // // Show loading while checking cookie
-  // if (isLoading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-  //       <div className="text-center">
-  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-  //         <p className="text-gray-600">Loading...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  const { data: user } = useAuth();
 
   const queryClient = useQueryClient();
   const isPublicActive = location.pathname.includes("/public");

@@ -37,8 +37,6 @@ export default function CompanyRegistration() {
   const createMutation = useMutation({
     mutationFn: (data: any) => companyService.registerCompanyWithAdmin(data),
     onSuccess: (data) => {
-      localStorage.setItem("user", JSON.stringify(data.user));
-
       // Success - redirect to dashboard
       alert(
         `Welcome! Company "${data.company.name}" has been created successfully!`

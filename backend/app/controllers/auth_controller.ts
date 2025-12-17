@@ -1,34 +1,33 @@
 import type { HttpContext } from '@adonisjs/core/http'
 
-import User from '#models/user'
-import Company from '#models/company'
-import { registerValidator } from '#validators/register'
 
+import { registerValidator } from '#validators/register'
+import { inject } from '@adonisjs/core'
+import { AuthService } from '#services/auth_service'
+
+@inject()
 export default class AuthController {
+  constructor(protected authService: AuthService) {}
+
   async register({ request, response }: HttpContext) {
     const data = await request.validateUsing(registerValidator)
-    const domain = request.hostname()
-    const company = await Company.findBy('slug', domain)
-    if (!company) {
-      return response.status(400).json({ message: 'Invalid domain' })
+    const domain = request.hostname()!
+    try {
+      const { user, token } = await this.authService.registerUser(domain, data)
+      response.cookie('token', token.value!.release())
+      return response.created({ user })
+    } catch (error) {
+      if (error.message === 'Invalid domain') {
+        return response.status(400).json({ message: 'Invalid domain' })
+      } else {
+        return response.status(500).json({ message: 'Failed to create user. Please try again.' })
+      }
     }
-    // console.log(company)
-    const companyId = company.id
-    // console.log(data, companyId, domain)
-    const user = await User.create({
-      ...data,
-      companyId,
-    })
-    const token = await User.accessTokens.create(user)
-    response.cookie('token', token.value!.release())
-
-    return response.created({ user, token })
   }
 
   async login({ request, response }: HttpContext) {
     const { email, password } = request.only(['email', 'password'])
-    const user = await User.verifyCredentials(email, password)
-    const token = await User.accessTokens.create(user)
+    const { user, token } = await this.authService.loginUser(email, password)
     response.cookie('token', token.value!.release())
 
     return response.ok({
@@ -41,21 +40,25 @@ export default class AuthController {
   }
 
   async logout({ auth, response }: HttpContext) {
-    const user = auth.user!
-    await User.accessTokens.delete(user, user.currentAccessToken.identifier)
-    response.clearCookie('token')
+    try {
+      const user = auth.user!
+      await this.authService.logoutUser(user)
+      response.clearCookie('token')
 
-    return response.ok({ message: 'Logged out successfully' })
+      return response.ok({ message: 'Logged out successfully' })
+    } catch (error) {
+      return response.status(500).json({ message: 'Failed to logout. Please try again.' })
+    }
   }
 
-  async me({ auth }: HttpContext) {
-    await auth.user!
-    return {
+  async me({ auth, response }: HttpContext) {
+    const user = auth.user!
+    return response.ok({
       user: {
-        id: auth.user!.id,
-        fullName: auth.user!.fullName,
-        role: auth.user!.role,
+        id: user.id,
+        fullName: user.fullName,
+        role: user.role,
       },
-    }
+    })
   }
 }

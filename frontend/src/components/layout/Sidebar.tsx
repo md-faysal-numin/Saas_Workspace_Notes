@@ -2,7 +2,8 @@ import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Folder, Plus, Loader, Trash2 } from "lucide-react";
 import { workspaceService } from "../../services/workspaceService";
-import { authService } from "../../services/authService";
+
+import { useAuth } from "../../hooks/useAuth";
 
 export default function Sidebar() {
   const { workspaceId } = useParams();
@@ -33,7 +34,7 @@ export default function Sidebar() {
     }
   };
 
-  const user = authService.getUser();
+  const { data: user } = useAuth();
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-screen sticky top-0 flex flex-col">

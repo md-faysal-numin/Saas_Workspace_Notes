@@ -7,5 +7,6 @@ export function useAuth() {
     queryFn: authService.getUser,
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: "always",
   });
 }

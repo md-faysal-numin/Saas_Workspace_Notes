@@ -5,7 +5,15 @@ import { authService } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function Login() {
+  // console.log("rendering login");
   const { data: user, isLoading } = useAuth();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Show loading while checking cookie
   if (isLoading) {
@@ -23,15 +31,8 @@ export default function Login() {
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -40,7 +41,7 @@ export default function Login() {
       await authService.login(formData);
       navigate("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Invalid email or password");
+      setError(err.response?.data?.message || "Invalid Credentials");
     } finally {
       setLoading(false);
     }

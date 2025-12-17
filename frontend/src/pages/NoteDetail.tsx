@@ -2,13 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Edit, Clock, User, Calendar } from "lucide-react";
 import { noteService } from "../services/noteService";
-import { authService } from "../services/authService";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import { useAuth } from "../hooks/useAuth";
 
 export default function NoteDetail() {
   const { noteId } = useParams();
   const navigate = useNavigate();
-  const currentUser = authService.getUser();
+  const { data: currentUser } = useAuth();
 
   const { data: note, isLoading } = useQuery({
     queryKey: ["note", noteId],

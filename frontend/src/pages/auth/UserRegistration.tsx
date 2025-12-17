@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import {  useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
   UserPlus,
   Mail,
@@ -26,7 +26,6 @@ export default function UserRegistration() {
     fullName: "",
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const createMutation = useMutation({
@@ -88,31 +87,6 @@ export default function UserRegistration() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Company Slug *
-            </label>
-            <div className="relative">
-              <Building2
-                size={20}
-                className="absolute left-3 top-3 text-gray-400"
-              />
-              <input
-                type="text"
-                value={formData.companySlug}
-                onChange={(e) =>
-                  setFormData({ ...formData, companySlug: e.target.value })
-                }
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 font-mono text-sm"
-                placeholder="your-company-slug"
-                required
-              />
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Ask your admin for the company slug
-            </p>
-          </div> */}
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Full Name *
@@ -204,10 +178,12 @@ export default function UserRegistration() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={createMutation.isPending}
             className="w-full bg-linear-to-r from-green-600 to-teal-600 text-white py-3 rounded-lg hover:from-green-700 hover:to-teal-700 disabled:opacity-50 font-semibold transition shadow-lg hover:shadow-xl"
           >
-            {loading ? "Creating Account..." : "Create Account"}
+            {createMutation.isPending
+              ? "Creating Account..."
+              : "Create Account"}
           </button>
         </form>
 

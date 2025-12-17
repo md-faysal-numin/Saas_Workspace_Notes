@@ -16,8 +16,7 @@ export const authService = {
   async login(data: LoginData) {
     const response = await api.post<{ user: User }>("/auth/login", data);
     const { user } = response.data;
-    // localStorage.setItem('token', token.token)
-    localStorage.setItem("user", JSON.stringify(user));
+    // console.log(user);
     return { user };
   },
 
@@ -26,16 +25,13 @@ export const authService = {
       "/auth/register",
       data
     );
-    const { user, token } = response.data;
-    // localStorage.setItem('token', token.token)
-    localStorage.setItem("user", JSON.stringify(user));
-    return { user, token: token.token };
+    const { user } = response.data;
+
+    return { user };
   },
 
   async logout() {
     await api.post("/auth/logout");
-    // localStorage.removeItem('token')
-    localStorage.removeItem("user");
   },
 
   async me() {
@@ -49,7 +45,7 @@ export const authService = {
 
       return response.data.user;
     } catch (error) {
-      return null; 
+      return null;
     }
   },
 
