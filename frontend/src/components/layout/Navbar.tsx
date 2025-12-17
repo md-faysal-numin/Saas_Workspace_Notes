@@ -2,19 +2,40 @@ import { Link, useParams, useLocation } from "react-router-dom";
 import { Globe, Lock, LogOut, User } from "lucide-react";
 import { authService } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Navbar() {
   const { workspaceId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const user = authService.getUser();
-  // console.log("hi", user);
+  // const user = authService.getUser();
+  // // console.log("hi", user);
+  // const { data: user } = useAuth();
 
+  // console.log(user);
+
+  const { data: user, isLoading } = useAuth();
+
+  // // Show loading while checking cookie
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-gray-50">
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+  //         <p className="text-gray-600">Loading...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  const queryClient = useQueryClient();
   const isPublicActive = location.pathname.includes("/public");
   const isPrivateActive = location.pathname.includes("/private");
 
   const handleLogout = async () => {
     await authService.logout();
+    queryClient.clear();
     navigate("/login");
   };
 

@@ -2,9 +2,25 @@ import { useState } from "react";
 import { useNavigate, Link, Navigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
 import { authService } from "../../services/authService";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function Login() {
-  if (authService.isAuthenticated()) {
+  const { data: user, isLoading } = useAuth();
+
+  // Show loading while checking cookie
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If error or no user, cookie is invalid/expired
+  if (user) {
     return <Navigate to="/dashboard" replace />;
   }
   const [formData, setFormData] = useState({

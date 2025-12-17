@@ -50,6 +50,12 @@ export default class AuthController {
 
   async me({ auth }: HttpContext) {
     await auth.user!
-    return auth.user
+    return {
+      user: {
+        id: auth.user!.id,
+        fullName: auth.user!.fullName,
+        role: auth.user!.role,
+      },
+    }
   }
 }

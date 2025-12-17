@@ -43,12 +43,18 @@ export const authService = {
     return response.data;
   },
 
-  getUser(): User | null {
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
+  async getUser(): Promise<User | null> {
+    try {
+      const response = await api.get<{ user: User }>("/auth/me");
+
+      return response.data.user;
+    } catch (error) {
+      return null; 
+    }
   },
 
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem("user");
+  async isAuthenticated(): Promise<boolean> {
+    const res = await this.getUser();
+    return res !== null;
   },
 };
