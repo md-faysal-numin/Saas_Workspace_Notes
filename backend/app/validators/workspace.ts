@@ -1,4 +1,4 @@
-import vine from '@vinejs/vine'
+import vine, { SimpleMessagesProvider } from '@vinejs/vine'
 
 export const workspaceValidator = (companyId: number) =>
   vine.compile(
@@ -17,3 +17,14 @@ export const workspaceValidator = (companyId: number) =>
       description: vine.string().maxLength(255).optional(),
     })
   )
+
+workspaceValidator.messagesProvider = new SimpleMessagesProvider({
+  'name.required': 'Workspace name is required',
+  'name.maxLength': 'Workspace name must not exceed 255 characters',
+
+  'slug.required': 'Workspace slug is required',
+  'slug.maxLength': 'Workspace slug must not exceed 255 characters',
+  'slug.database.unique': 'This workspace slug already exists in your company',
+
+  'description.maxLength': 'Description must not exceed 255 characters',
+})

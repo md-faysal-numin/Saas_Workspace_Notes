@@ -30,7 +30,7 @@ export default function CompanyRegistration() {
   const isValidDomain = (name: string) => {
     const domainRegex =
       /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
-    console.log(domainRegex.test("name.com"));
+    // console.log(domainRegex.test("name.com"));
     return domainRegex.test(name);
   };
 
@@ -80,6 +80,8 @@ export default function CompanyRegistration() {
 
     createMutation.mutate({ ...formData });
   };
+
+  // console.log(fieldErrors);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">

@@ -144,7 +144,7 @@ export class NoteService {
       })
       .select('notes.*')
       .select('uv.vote_type as userVote')
-      .paginate(page, Math.max(limit, 20))
+      .paginate(page, Math.min(limit, 20))
 
     // console.log(notes)
     return notes

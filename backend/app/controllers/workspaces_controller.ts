@@ -9,7 +9,7 @@ export default class WorkspacesController {
   async index({ auth, request }: HttpContext) {
     const user = auth.user!
     let { page = 1, limit = 20 } = request.qs()
-    limit = Math.max(limit, 20)
+    limit = Math.min(limit, 20)
 
     const workspaces = await Workspace.query()
       .where('companyId', user.companyId)
@@ -54,7 +54,7 @@ export default class WorkspacesController {
     }
     // Get public notes in this workspace created by company users
     let { page = 1, limit = 20 } = request.qs()
-    limit = Math.max(limit, 20)
+    limit = Math.min(limit, 20)
 
     const notes = await Note.query()
       .where('workspaceId', workspace.id)

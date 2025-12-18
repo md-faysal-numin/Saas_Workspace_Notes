@@ -19,10 +19,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
+  @column({ serializeAs: null })
   declare companyId: number
 
-  @column()
+  @column({ serializeAs: null })
   declare email: string
 
   @column({ serializeAs: null })

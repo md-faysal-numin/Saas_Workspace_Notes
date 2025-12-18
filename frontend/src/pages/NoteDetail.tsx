@@ -4,12 +4,10 @@ import { ArrowLeft, Edit, Clock, User, Calendar } from "lucide-react";
 import { noteService } from "../services/noteService";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import { useAuth } from "../hooks/useAuth";
-
 export default function NoteDetail() {
   const { noteId } = useParams();
   const navigate = useNavigate();
   const { data: currentUser } = useAuth();
-
   const { data: note, isLoading } = useQuery({
     queryKey: ["note", noteId],
     queryFn: () => noteService.getNote(Number(noteId)),
@@ -17,12 +15,14 @@ export default function NoteDetail() {
   const { data: histories } = useQuery({
     queryKey: ["note-histories", noteId],
     queryFn: () => noteService.getHistories(Number(noteId)),
-    enabled: !!note && note.createdBy === currentUser?.id,
+    enabled:
+      !!note &&
+      (note.createdBy === currentUser?.id || currentUser?.role === "admin"),
   });
 
   if (isLoading) return <LoadingSpinner />;
   if (!note) return <div>Note not found</div>;
-  console.log(note);
+  // console.log(note);
 
   const isCreator = note.createdBy === currentUser?.id;
 
@@ -42,7 +42,7 @@ export default function NoteDetail() {
         <div className="border-b border-gray-200 p-6">
           <div className="flex justify-between items-start mb-4">
             <h1 className="text-3xl font-bold text-gray-900">{note.title}</h1>
-            {isCreator && (
+            {(isCreator || currentUser?.role === "admin") && (
               <Link
                 to={`/dashboard/note/${note.id}/edit`}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
