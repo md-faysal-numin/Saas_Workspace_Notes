@@ -15,6 +15,12 @@ import User from './user.js'
 import Tag from './tag.js'
 
 export default class Note extends BaseModel {
+  serializeExtras() {
+    return {
+      userVote: this.$extras.userVote,
+    }
+  }
+
   @column({ isPrimary: true })
   declare id: number
 

@@ -48,6 +48,7 @@ export interface Note {
   createdAt: string;
   updatedAt: string;
   workspace?: Workspace;
+  userVote?: "upvote" | "downvote" | null;
   creator?: {
     id: number;
     fullName: string;

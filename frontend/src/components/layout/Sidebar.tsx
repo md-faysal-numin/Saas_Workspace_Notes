@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Folder, Plus, Loader, Trash2 } from "lucide-react";
+import { Folder, Plus, Loader, Trash2, Edit } from "lucide-react";
 import { workspaceService } from "../../services/workspaceService";
 
 import { useAuth } from "../../hooks/useAuth";
@@ -37,7 +37,7 @@ export default function Sidebar() {
   const { data: user } = useAuth();
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 h-screen sticky top-0 flex flex-col">
+    <div className="min-w-80 bg-white border-r border-gray-200 h-screen sticky top-0 flex flex-col">
       <div className="p-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Workspaces</h2>
         {user?.role === "admin" && (
@@ -77,12 +77,20 @@ export default function Sidebar() {
                   </span>
                 </Link>
                 {user?.role === "admin" && (
-                  <button
-                    onClick={() => handleDelete(workspace.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded transition"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <>
+                    <Link
+                      to={`/dashboard/workspace/${workspace.id}/edit`}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded transition"
+                    >
+                      <Edit size={18} />
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(workspace.id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded transition"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </>
                 )}
               </div>
             ))}

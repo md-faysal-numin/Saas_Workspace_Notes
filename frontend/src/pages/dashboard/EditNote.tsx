@@ -58,6 +58,7 @@ export default function EditNote() {
       queryClient.invalidateQueries({ queryKey: ["note", noteId] });
       queryClient.invalidateQueries({ queryKey: ["public-notes"] });
       queryClient.invalidateQueries({ queryKey: ["private-notes"] });
+      queryClient.invalidateQueries({ queryKey: ["note-histories", noteId] });
       navigate(`/dashboard/note/${updatedNote.id}`);
     },
 

@@ -17,6 +17,7 @@ import CreateNote from "./pages/dashboard/CreateNote";
 import EditNote from "./pages/dashboard/EditNote";
 import NoteDetail from "./pages/NoteDetail";
 import ErrorBoundary from "./pages/ErrorBoundary";
+import EditWorkspace from "./pages/dashboard/EditWorkspace";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,6 +62,10 @@ function App() {
             <Route
               path="workspace/:workspaceId/create-note"
               element={<CreateNote />}
+            />
+            <Route
+              path="workspace/:workspaceId/edit"
+              element={<EditWorkspace />}
             />
 
             {/* Note Routes */}

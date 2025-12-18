@@ -14,7 +14,6 @@ export default function NoteDetail() {
     queryKey: ["note", noteId],
     queryFn: () => noteService.getNote(Number(noteId)),
   });
-
   const { data: histories } = useQuery({
     queryKey: ["note-histories", noteId],
     queryFn: () => noteService.getHistories(Number(noteId)),
@@ -23,13 +22,16 @@ export default function NoteDetail() {
 
   if (isLoading) return <LoadingSpinner />;
   if (!note) return <div>Note not found</div>;
+  console.log(note);
 
   const isCreator = note.createdBy === currentUser?.id;
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <button
-        onClick={() => navigate(-1)}
+        onClick={() =>
+          navigate(`/dashboard/workspace/${note.workspaceId}/${note.type}`)
+        }
         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
       >
         <ArrowLeft size={20} />
