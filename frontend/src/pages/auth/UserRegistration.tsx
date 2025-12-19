@@ -30,7 +30,7 @@ export default function UserRegistration() {
 
   const createMutation = useMutation({
     mutationFn: (data: any) => authService.register(data),
-    onSuccess: (data) => {
+    onSuccess: () => {
       navigate("/dashboard");
     },
 

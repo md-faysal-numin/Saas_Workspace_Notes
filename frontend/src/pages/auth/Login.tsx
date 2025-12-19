@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { useNavigate, Link, Navigate } from "react-router-dom";
-import { LogIn } from "lucide-react";
+import { AlertCircle, LogIn } from "lucide-react";
 import { authService } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
-
+import { useMutation } from "@tanstack/react-query";
+type FieldErrors = {
+  email?: string;
+  password?: string;
+};
+type FieldName = keyof FieldErrors;
 export default function Login() {
   // console.log("rendering login");
   const { data: user, isLoading } = useAuth();
@@ -11,10 +16,36 @@ export default function Login() {
     email: "",
     password: "",
   });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const navigate = useNavigate();
 
+  const createMutation = useMutation({
+    mutationFn: (data: any) => authService.login(data),
+    onSuccess: () => {
+      navigate("/dashboard");
+    },
+
+    onError: (error: any) => {
+      if (error.response?.status === 422) {
+        const errors: FieldErrors = {};
+
+        error.response.data.errors.forEach(
+          (err: { field: FieldName; message: string; rule: string }) => {
+            errors[err.field] = err.message;
+          }
+        );
+
+        setFieldErrors(errors);
+      }
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    createMutation.mutate({
+      ...formData,
+    });
+  };
   // Show loading while checking cookie
   if (isLoading) {
     return (
@@ -27,25 +58,9 @@ export default function Login() {
     );
   }
 
-  // If error or no user, cookie is invalid/expired
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      await authService.login(formData);
-      navigate("/dashboard");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Invalid Credentials");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -58,9 +73,10 @@ export default function Login() {
           <p className="text-gray-600 mt-2">Login to your account</p>
         </div>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
-            {error}
+        {createMutation.isError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6 flex items-start gap-3">
+            <AlertCircle size={20} className="shrink-0 mt-0.5" />
+            <span className="text-sm">Registration Failed</span>
           </div>
         )}
 
@@ -80,6 +96,9 @@ export default function Login() {
               required
             />
           </div>
+          {fieldErrors.email && (
+            <p className="text-sm text-red-600 mt-1">{fieldErrors.email}</p>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -96,13 +115,16 @@ export default function Login() {
               required
             />
           </div>
+          {fieldErrors.password && (
+            <p className="text-sm text-red-600 mt-1">{fieldErrors.password}</p>
+          )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={createMutation.isPending}
             className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium transition"
           >
-            {loading ? "Logging in..." : "Login"}
+            {createMutation.isPending ? "Logging in..." : "Login"}
           </button>
         </form>
 
