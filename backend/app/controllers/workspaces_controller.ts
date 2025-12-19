@@ -1,23 +1,27 @@
 import Note from '#models/note'
 import Workspace from '#models/workspace'
+import { WorkspaceService } from '#services/workspace_service'
 import { updateWorkspaceValidator } from '#validators/update_workspace'
 import { workspaceValidator } from '#validators/workspace'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
+@inject()
 export default class WorkspacesController {
+  constructor(protected workspaceService: WorkspaceService) {}
   // List all workspaces in the user's company
-  async index({ auth, request }: HttpContext) {
+  async index({ auth, request, response }: HttpContext) {
     const user = auth.user!
-    let { page = 1, limit = 20 } = request.qs()
-    limit = Math.min(limit, 20)
 
-    const workspaces = await Workspace.query()
-      .where('companyId', user.companyId)
-      .preload('creator', (query) => query.select('id', 'fullName'))
-      .orderBy('createdAt', 'desc')
-      .paginate(page, limit)
+    try {
+      let filters = request.qs()
 
-    return workspaces
+      const workspaces = await this.workspaceService.getAllWorkspaces(user.companyId, filters)
+
+      return workspaces
+    } catch (error) {
+      return response.internalServerError({ error: error.message })
+    }
   }
 
   // Create new workspace
@@ -26,94 +30,65 @@ export default class WorkspacesController {
     const validator = workspaceValidator(user.companyId)
     const data = await request.validateUsing(validator)
 
-    if (user.role !== 'admin') {
-      return response.forbidden({ error: 'Only workspace creator can update' })
+    try {
+      const workspace = await this.workspaceService.createWorkspace(
+        user.id,
+        user.role,
+        user.companyId,
+        data
+      )
+      return response.created(workspace)
+    } catch (error) {
+      return response.badRequest({ error: error.message })
     }
-
-    const workspace = await Workspace.create({
-      ...data,
-      companyId: user.companyId,
-      createdBy: user.id,
-    })
-
-    await workspace.load('creator')
-    return response.created(workspace)
   }
 
-  // Get single workspace with its public notes
-  async show({ auth, params, request, response }: HttpContext) {
+  // Get single workspace
+  async show({ auth, params, response }: HttpContext) {
     const user = auth.user!
-    const workspace = await Workspace.query()
-      .where('id', params.id)
-      .where('companyId', user.companyId) // Security: Only same company
-      .preload('creator')
-      .firstOrFail()
-
-    if (workspace.companyId !== user.companyId) {
-      return response.forbidden({ error: 'Access denied' })
-    }
-    // Get public notes in this workspace created by company users
-    let { page = 1, limit = 20 } = request.qs()
-    limit = Math.min(limit, 20)
-
-    const notes = await Note.query()
-      .where('workspaceId', workspace.id)
-      .where('type', 'public')
-      .where('status', 'published')
-      .preload('creator', (query) => query.select('id', 'fullName'))
-      .preload('tags')
-      .orderBy('createdAt', 'desc')
-      .paginate(page, limit)
-
-    return {
-      workspace,
-      notes,
+    try {
+      const workspace = await this.workspaceService.getWorkspace(user.companyId, Number(params.id))
+      return response.ok(workspace)
+    } catch (error) {
+      if (error.message.includes('Access denied')) {
+        return response.forbidden({ error: error.message })
+      }
+      return response.notFound({ error: 'Workspace not found' })
     }
   }
 
   // Update workspace
   async update({ auth, params, request, response }: HttpContext) {
     const user = auth.user!
-    const workspace = await Workspace.query()
-      .where('id', params.id)
-      .where('companyId', user.companyId)
-      .firstOrFail()
-    if (workspace.companyId !== user.companyId) {
-      return response.forbidden({ error: 'Access denied' })
-    }
-    // Only admin can update
-    if (user.role !== 'admin') {
-      return response.forbidden({ error: 'Only workspace creator can update' })
-    }
-    const workspaceId = params.id
-    const companyId = user.companyId
-    const data = await request.validateUsing(updateWorkspaceValidator, {
-      meta: { workspaceId, companyId },
-    })
-    workspace.merge(data)
-    await workspace.save()
+    try {
+      let workspace = await this.workspaceService.getWorkspace(user.companyId, Number(params.id))
+      const workspaceId = params.id
+      const companyId = user.companyId
+      const data = await request.validateUsing(updateWorkspaceValidator, {
+        meta: { workspaceId, companyId },
+      })
+      workspace = await this.workspaceService.updateWorkspace(workspace, user.role, data)
 
-    return workspace
+      return workspace
+    } catch (error) {
+      if (error.message.includes('Access denied')) {
+        return response.forbidden({ error: error.message })
+      }
+      return response.badRequest({ error: error.message })
+    }
   }
 
   // Delete workspace
   async destroy({ auth, params, response }: HttpContext) {
     const user = auth.user!
-    const workspace = await Workspace.query()
-      .where('id', params.id)
-      .where('companyId', user.companyId)
-      .firstOrFail()
-
-    if (workspace.companyId !== user.companyId) {
-      return response.forbidden({ error: 'Access denied' })
+    try {
+      await this.workspaceService.deleteWorkspace(user.companyId, user.role, Number(params.id))
+      return response.noContent()
+    } catch (error) {
+      if (error.message.includes('Access denied')) {
+        return response.forbidden({ error: error.message })
+      }
+      return response.badRequest({ error: error.message })
     }
-
-    // Only creator can delete
-    if (user.role !== 'admin') {
-      return response.forbidden({ error: 'Only workspace creator can delete' })
-    }
-
-    await workspace.delete()
-    return response.noContent()
   }
 }

@@ -27,12 +27,14 @@ export default function EditWorkspace() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   /** Fetch workspace */
-  const { data: workspaceAndNotes, isLoading } = useQuery({
+  const { data: workspace, isLoading } = useQuery({
     queryKey: ["workspace", workspaceId],
     queryFn: () => workspaceService.getWorkspace(Number(workspaceId)),
   });
-  const workspace = workspaceAndNotes?.workspace;
+  // const workspace = workspaceAndNotes?.workspace;
   /** Populate form */
+
+  // console.log(workspace);
   useEffect(() => {
     if (workspace) {
       setFormData({

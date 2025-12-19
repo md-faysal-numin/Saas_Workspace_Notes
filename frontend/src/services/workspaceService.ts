@@ -13,12 +13,7 @@ export const workspaceService = {
   },
 
   async getWorkspace(id: number, page = 1) {
-    const response = await api.get<{
-      workspace: Workspace;
-      notes: PaginatedResponse<Note>;
-    }>(`/workspaces/${id}`, {
-      params: { page, limit: 20 },
-    });
+    const response = await api.get<Workspace>(`/workspaces/${id}`);
     return response.data;
   },
 
