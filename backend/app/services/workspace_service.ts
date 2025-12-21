@@ -1,4 +1,3 @@
-import Note from '#models/note'
 import Workspace from '#models/workspace'
 
 interface WorkspaceFilters {

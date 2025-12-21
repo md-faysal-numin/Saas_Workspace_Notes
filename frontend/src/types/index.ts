@@ -34,6 +34,12 @@ export interface Tag {
   slug: string;
 }
 
+export interface NoteVote {
+  noteId: number;
+
+  voteType: "upvote" | "downvote";
+}
+
 export interface Note {
   id: number;
   workspaceId: number;
@@ -54,6 +60,7 @@ export interface Note {
     fullName: string;
   };
   tags?: Tag[];
+  votes?: NoteVote[];
 }
 
 export interface NoteHistory {

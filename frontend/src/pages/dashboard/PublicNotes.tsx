@@ -139,8 +139,8 @@ export default function PublicNotes() {
         <>
           <div className="space-y-4">
             {data?.data.map((note) => {
-              const hasUpvoted = note.userVote === "upvote";
-              const hasDownvoted = note.userVote === "downvote";
+              const hasUpvoted = note.votes?.[0]?.voteType === "upvote";
+              const hasDownvoted = note.votes?.[0]?.voteType === "downvote";
 
               return (
                 <div

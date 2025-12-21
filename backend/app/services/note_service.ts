@@ -125,9 +125,12 @@ export class NoteService {
     const companyUserIds = await this.getAllUserIds(companyId)
     const query = Note.query()
       .where('type', 'public')
-      .preload('workspace')
+      .preload('workspace', (qs) => {
+        qs.select('id', 'name')
+      })
       .preload('creator', (qs) => qs.select('id', 'fullName'))
       .preload('tags')
+      .preload('votes', (qs) => qs.where('userId', userId).select('voteType'))
       .orderBy('createdAt', 'desc')
 
     this.applyPublicStatusFilter(query, userId, companyUserIds, status)
@@ -137,14 +140,7 @@ export class NoteService {
       query.where('workspaceId', workspaceId)
     }
 
-    // const notes = await query.paginate(page, Math.max(limit, 20))
-    const notes = await query
-      .leftJoin('note_votes as uv', (join) => {
-        join.on('uv.note_id', '=', 'notes.id').andOnVal('uv.user_id', userId)
-      })
-      .select('notes.*')
-      .select('uv.vote_type as userVote')
-      .paginate(page, Math.min(limit, 20))
+    const notes = await query.paginate(page, Math.min(limit, 20))
 
     // console.log(notes)
     return notes
