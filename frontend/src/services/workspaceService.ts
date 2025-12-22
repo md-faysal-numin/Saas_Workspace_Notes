@@ -1,5 +1,5 @@
 import { api } from "./api";
-import type { Workspace, Note, PaginatedResponse } from "../types";
+import type { Workspace, PaginatedResponse } from "../types";
 
 export const workspaceService = {
   async getWorkspaces(page = 1) {
